@@ -26,7 +26,10 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          # Workaround: bug en Flutter 3.24 con advisories cache (dart-lang/pub#4127)
+          dart pub cache repair 2>/dev/null || true
+          flutter pub get
 
       - name: Build Flutter Web (GitHub Pages)
         run: |
