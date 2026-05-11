@@ -318,12 +318,12 @@ class _TopBar extends StatelessWidget {
             children: [
               const Icon(Icons.arrow_back, color: _gold),
               const SizedBox(width: 16),
-              const Text('LOGISTX ELITE',
+              const Text('NEXO ÉLITE GLOBAL',
                   style: TextStyle(
                       color: _gold,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                      fontSize: 16)),
+                      letterSpacing: 1.5,
+                      fontSize: 14)),
             ],
           ),
           Row(
@@ -427,22 +427,79 @@ class _GoogleButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(
-              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-              width: 22,
-              height: 22,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.login, size: 22),
-            ),
+            _GoogleLogo(),
             const SizedBox(width: 12),
             const Text('Continuar con Google',
-                style:
-                    TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Color(0xFF3C4043))),
           ],
         ),
       ),
     );
   }
+}
+
+class _GoogleLogo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 22,
+      height: 22,
+      child: CustomPaint(painter: _GoogleGPainter()),
+    );
+  }
+}
+
+class _GoogleGPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    // Sectores del logo G de Google (colores oficiales)
+    // Rojo (top)
+    _arc(canvas, c, r, -90, 90, const Color(0xFFEA4335));
+    // Amarillo (bottom-right)
+    _arc(canvas, c, r, 0, 90, const Color(0xFFFBBC05));
+    // Verde (bottom-left)
+    _arc(canvas, c, r, 90, 90, const Color(0xFF34A853));
+    // Azul (left)
+    _arc(canvas, c, r, 180, 90, const Color(0xFF4285F4));
+
+    // Hueco central (círculo blanco)
+    canvas.drawCircle(c, r * 0.55, Paint()..color = Colors.white);
+
+    // Franja horizontal del "G"
+    final paint = Paint()..color = const Color(0xFF4285F4);
+    final rect = Rect.fromLTWH(
+        c.dx, c.dy - r * 0.2, r * 0.95, r * 0.4);
+    canvas.drawRect(rect, paint);
+
+    // Relleno interior del hueco del "G"
+    canvas.drawCircle(c, r * 0.42, Paint()..color = Colors.white);
+  }
+
+  void _arc(Canvas c, Offset center, double r, double startDeg, double sweepDeg,
+      Color color) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    const deg2rad = 3.14159265 / 180;
+    final path = Path()
+      ..moveTo(center.dx, center.dy)
+      ..arcTo(
+          Rect.fromCircle(center: center, radius: r),
+          startDeg * deg2rad,
+          sweepDeg * deg2rad,
+          false)
+      ..close();
+    c.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_) => false;
 }
 
 class _Divider extends StatelessWidget {
@@ -653,57 +710,73 @@ class _EquipmentSelector extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.5)),
         const SizedBox(height: 12),
+        // Grilla 5 columnas con tamaño uniforme fijo
         LayoutBuilder(builder: (context, constraints) {
-          final itemW = (constraints.maxWidth - 4 * 8) / 5;
-          return Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const cols = 5;
+          const gap = 8.0;
+          final cardW = (constraints.maxWidth - gap * (cols - 1)) / cols;
+          const cardH = 108.0; // altura fija: imagen + label
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: _equipmentOptions.map((opt) {
               final isSelected = selected == opt.value;
               return GestureDetector(
                 onTap: () => onSelected(opt.value),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: itemW.clamp(60.0, 130.0),
-                  padding: const EdgeInsets.all(8),
+                  duration: const Duration(milliseconds: 180),
+                  width: cardW,
+                  height: cardH,
+                  padding: const EdgeInsets.fromLTRB(6, 8, 6, 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F1B13),
+                    color: isSelected
+                        ? const Color(0xFF2A2410)
+                        : const Color(0xFF1A1710),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected
-                          ? _gold
-                          : Colors.white.withOpacity(0.05),
+                      color: isSelected ? _gold : Colors.white.withOpacity(0.07),
                       width: isSelected ? 1.5 : 1,
                     ),
+                    boxShadow: isSelected
+                        ? [BoxShadow(
+                            color: _gold.withOpacity(0.15),
+                            blurRadius: 8,
+                            spreadRadius: 0)]
+                        : [],
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.network(
-                          opt.imageUrl,
-                          height: 56,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          opacity: AlwaysStoppedAnimation(isSelected ? 1 : 0.45),
-                          errorBuilder: (_, __, ___) => Container(
-                            height: 56,
-                            color: Colors.white10,
-                            child: const Icon(Icons.local_shipping,
-                                color: Colors.white24),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            opt.imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            opacity: AlwaysStoppedAnimation(isSelected ? 1.0 : 0.5),
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.white10,
+                              child: const Icon(Icons.local_shipping,
+                                  color: Colors.white24, size: 24),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(opt.label,
-                          style: TextStyle(
-                              color: isSelected
-                                  ? _gold
-                                  : Colors.white.withOpacity(0.5),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5),
-                          textAlign: TextAlign.center),
+                      Text(
+                        opt.label,
+                        style: TextStyle(
+                          color: isSelected ? _gold : Colors.white.withOpacity(0.6),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                          height: 1,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
@@ -910,14 +983,14 @@ class _Footer extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('LOGISTX GLOBAL',
+              const Text('NEXO ÉLITE GLOBAL',
                   style: TextStyle(
                       color: _gold,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 3)),
               const SizedBox(height: 4),
-              Text('© 2026 LOGISTX GLOBAL. PRECISION LOGISTICS.',
+              Text('© 2026 NEXO ÉLITE GLOBAL. PRECISION LOGISTICS.',
                   style: TextStyle(
                       color: Colors.white.withOpacity(0.3), fontSize: 9,
                       letterSpacing: 1)),
