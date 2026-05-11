@@ -1,0 +1,47 @@
+name: Build and Deploy Flutter Web
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release --web-renderer canvaskit
+
+      - name: Deploy files to NYC3
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 165.227.65.100
+          port: 2242
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "build/web/*"
+          target: "/var/www/nexo-app-v2"
+          strip_components: 2
+
+      - name: Reload nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 165.227.65.100
+          port: 2242
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            chown -R www-data:www-data /var/www/nexo-app-v2/
+            systemctl reload nginx
+            echo "Deploy completado: $(date)"
