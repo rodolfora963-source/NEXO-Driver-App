@@ -1,47 +1,72 @@
-name: Build and Deploy Flutter Web
+name: Build & Deploy — GitHub Pages (Auditoría)
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build-deploy:
+  build-and-preview:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Flutter Web
-        run: flutter build web --release --web-renderer canvaskit
+      - name: Build Flutter Web (GitHub Pages)
+        run: |
+          flutter build web --release \
+            --base-href /NEXO-Driver-App/
 
-      - name: Deploy files to NYC3
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          host: 165.227.65.100
-          port: 2242
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "build/web/*"
-          target: "/var/www/nexo-app-v2"
-          strip_components: 2
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          publish_branch: gh-pages
+          commit_message: "Preview build — ${{ github.sha }}"
 
-      - name: Reload nginx
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 165.227.65.100
-          port: 2242
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            chown -R www-data:www-data /var/www/nexo-app-v2/
-            systemctl reload nginx
-            echo "Deploy completado: $(date)"
+  # ─────────────────────────────────────────────────────────
+  # PRODUCCIÓN NYC3 — EN HOLD (Protocolo PAM)
+  # Se activa solo con aprobación manual del Director
+  # ─────────────────────────────────────────────────────────
+  # deploy-nyc3:
+  #   needs: build-and-preview
+  #   if: false  # HOLD — descomentar cuando el Director apruebe
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy to NYC3
+  #       uses: appleboy/scp-action@v0.1.7
+  #       with:
+  #         host: 165.227.65.100
+  #         port: 2242
+  #         username: root
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         source: "build/web/*"
+  #         target: "/var/www/nexo-app-v2"
+  #         strip_components: 2
+  #     - name: Reload nginx
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: 165.227.65.100
+  #         port: 2242
+  #         username: root
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           chown -R www-data:www-data /var/www/nexo-app-v2/
+  #           systemctl reload nginx
