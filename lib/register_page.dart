@@ -930,13 +930,13 @@ class _SuccessView extends StatelessWidget {
                         fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 Text(
-                  'Revisa tu correo electrónico.\nHaz clic en el enlace para activar tu cuenta.',
+                  'Revisa tu correo para activar tu cuenta\ny continúa con la verificación de documentos.',
                   style: TextStyle(
                       color: Colors.white.withOpacity(0.6), fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 if (debugLink != null) ...[
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -958,6 +958,43 @@ class _SuccessView extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [_gold, _goldDark]),
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: [
+                        BoxShadow(
+                            color: _gold.withOpacity(0.3),
+                            blurRadius: 16,
+                            offset: const Offset(0, 3)),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/verification'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: const StadiumBorder(),
+                      ),
+                      icon: const Icon(Icons.verified_user_outlined,
+                          color: Colors.white, size: 18),
+                      label: const Text(
+                        'CONTINUAR A VERIFICACIÓN',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                            letterSpacing: 2),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

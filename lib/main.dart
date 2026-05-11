@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'register_page.dart';
+import 'verification_page.dart';
 
 void main() {
   runApp(const NexoDriverApp());
@@ -21,7 +22,11 @@ class NexoDriverApp extends StatelessWidget {
           surface: Color(0xFF1A1A1A),
         ),
       ),
-      home: const RegisterPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const RegisterPage(),
+        '/verification': (_) => const VerificationPage(),
+      },
     );
   }
 }
