@@ -35,12 +35,16 @@ class AuthResult {
   final String message;
   final String? debugLink;
   final String? error;
+  final String? jwt;
+  final String? nombre;
 
   const AuthResult({
     required this.success,
     required this.message,
     this.debugLink,
     this.error,
+    this.jwt,
+    this.nombre,
   });
 }
 
@@ -66,13 +70,43 @@ class AuthService {
       final detail = body['detail'];
       final msg = detail is String
           ? detail
-          : (detail is List ? detail.map((e) => e['msg']).join(', ') : 'Error desconocido');
+          : (detail is List
+              ? detail.map((e) => e['msg']).join(', ')
+              : 'Error desconocido');
 
       return AuthResult(success: false, message: msg, error: msg);
     } catch (e) {
       return AuthResult(
         success: false,
         message: 'Sin conexión con el servidor. Intenta de nuevo.',
+        error: e.toString(),
+      );
+    }
+  }
+
+  static Future<AuthResult> verifyMagicLink(String magicToken) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$_base/verify?token=${Uri.encodeComponent(magicToken)}'),
+      ).timeout(const Duration(seconds: 15));
+
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+
+      if (res.statusCode == 200 && body['ok'] == true) {
+        return AuthResult(
+          success: true,
+          message: '¡Cuenta activada!',
+          jwt: body['access_token'] as String?,
+          nombre: body['nombre'] as String?,
+        );
+      }
+
+      final detail = body['detail'] as String? ?? 'Token inválido o expirado';
+      return AuthResult(success: false, message: detail, error: detail);
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Error de conexión al verificar el enlace.',
         error: e.toString(),
       );
     }
@@ -88,11 +122,18 @@ class AuthService {
 
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200) {
-        return AuthResult(success: true, message: 'Bienvenido, ${body['nombre']}');
+        return AuthResult(
+          success: true,
+          message: 'Bienvenido, ${body['nombre']}',
+          jwt: body['access_token'] as String?,
+          nombre: body['nombre'] as String?,
+        );
       }
-      return AuthResult(success: false, message: body['detail'] ?? 'Error', error: body['detail']);
+      final msg = body['detail'] as String? ?? 'Error';
+      return AuthResult(success: false, message: msg, error: msg);
     } catch (e) {
-      return AuthResult(success: false, message: 'Error de conexión', error: e.toString());
+      return AuthResult(
+          success: false, message: 'Error de conexión', error: e.toString());
     }
   }
 }

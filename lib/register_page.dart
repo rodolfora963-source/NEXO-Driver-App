@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_service.dart';
+import 'services/app_router.dart';
 
 const _gold = Color(0xFFD4AF37);
 const _goldDark = Color(0xFFB8860B);
@@ -130,7 +131,10 @@ class _RegisterPageState extends State<RegisterPage> {
       }
       final result = await AuthService.googleLogin(idToken);
       setState(() => _loading = false);
-      if (result.success) {
+      if (result.success && result.jwt != null) {
+        // Route based on document status immediately
+        if (mounted) await routeFromJwt(context, result.jwt!);
+      } else if (result.success) {
         setState(() => _submitted = true);
       } else {
         setState(() => _generalError = result.message);
