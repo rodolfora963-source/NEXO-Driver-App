@@ -11,8 +11,9 @@ Future<void> routeFromJwt(BuildContext context, String jwt) async {
       Navigator.of(context)
           .pushReplacementNamed('/verification', arguments: jwt);
     } else if (status.status == 'approved') {
+      // Certified drivers go directly to the Load Board
       Navigator.of(context)
-          .pushReplacementNamed('/dashboard', arguments: jwt);
+          .pushReplacementNamed('/loads', arguments: jwt);
     } else {
       // pending / rejected
       Navigator.of(context)

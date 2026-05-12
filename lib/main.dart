@@ -4,6 +4,7 @@ import 'register_page.dart';
 import 'verification_page.dart';
 import 'screens/verification_status_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/load_board_screen.dart';
 import 'services/app_router.dart';
 
 void main() {
@@ -33,6 +34,7 @@ class NexoDriverApp extends StatelessWidget {
         '/verification': (_) => const VerificationPage(),
         '/status': (_) => const VerificationStatusScreen(),
         '/dashboard': (_) => const DashboardScreen(),
+        '/loads': (_) => const LoadBoardScreen(),
       },
     );
   }

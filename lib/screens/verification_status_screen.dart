@@ -314,7 +314,7 @@ class _StatusBody extends StatelessWidget {
                   ),
                   child: ElevatedButton.icon(
                     onPressed: () => Navigator.of(context)
-                        .pushReplacementNamed('/dashboard',
+                        .pushReplacementNamed('/loads',
                             arguments: jwt),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,

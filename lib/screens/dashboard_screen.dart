@@ -355,7 +355,10 @@ class _QuickActions extends StatelessWidget {
           _ActionBtn(
               icon: Icons.search,
               label: 'Buscar\nCargas',
-              onTap: () {}),
+              onTap: () {
+                final jwt = ModalRoute.of(context)?.settings.arguments as String?;
+                Navigator.of(context).pushReplacementNamed('/loads', arguments: jwt);
+              }),
           const SizedBox(width: 10),
           _ActionBtn(
               icon: Icons.route_outlined,
